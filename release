@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+for i in "$@"
+do
+  case $i in
+    -b|--branch)
+      shift
+      BRANCH="${1}"
+      ;;
+    -d|--deployment)
+      shift
+      DEPLOYMENT="${1}"
+      ;;
+    -p|--promote)
+      shift
+      PROMOTE="${1}"
+      ;;
+    -c|--commit)
+      shift
+      COMMIT="${1}"
+      ;;
+  esac
+done
+
+if [ -n "$COMMIT" ]; then
+  COMMITISH=$COMMIT
+elif [ -n "$PROMOTE" ]; then
+  COMMITISH="$(git tag | grep "${PROMOTE}-" | sort | tail -1)"
+elif [ -n "$BRANCH" ]; then
+  COMMITISH="origin/${BRANCH}"
+fi
+
+if [ -z "$COMMITISH" ]; then
+  cat <<EOF
+This tool is for triggering releases on git projects that are set up to deploy
+on certain tags.
+
+Usage: $0 [options]
+-b|--branch      The branch to release
+-c|--commit      A commit to release
+-d|--deployment  The environment to deploy
+-p|--promote     The environment to promote
+
+Examples:
+
+Deploy the current master branch to staging:
+  $0 -b master -d staging
+
+Deploy a particular commit to staging:
+  $0 -c abc1234 -d staging
+
+Deploy the latest staging release to production:
+  $0 -p staging -d production
+EOF
+
+  exit
+fi
+
+git fetch
+git checkout "$COMMITISH"
+git tag "${DEPLOYMENT}-$(date --iso-8601=minutes)"
+git push --tags
