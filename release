@@ -9,6 +9,7 @@ do
       ;;
     -d|--deployment)
       shift
+      shift
       DEPLOYMENT="${1}"
       ;;
     -p|--promote)
@@ -27,7 +28,7 @@ if [ -n "$COMMIT" ]; then
 elif [ -n "$PROMOTE" ]; then
   COMMITISH="$(git tag | grep "${PROMOTE}-" | sort | tail -1)"
 elif [ -n "$BRANCH" ]; then
-  COMMITISH="origin/${BRANCH}"
+  COMMITISH="${BRANCH}"
 fi
 
 if [ -z "$COMMITISH" ]; then
@@ -58,5 +59,11 @@ fi
 
 git fetch
 git checkout "$COMMITISH"
-git tag "${DEPLOYMENT}-$(date --iso-8601=minutes)"
+
+if [ "$(uname)" == "Darwin"  ]; then
+  git tag "${DEPLOYMENT}-$(gdate --utc +%Y%m%d%H%M)"
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux"  ]; then
+  git tag "${DEPLOYMENT}-$(date --utc +%Y%m%d%H%M)"
+fi
+
 git push --tags
