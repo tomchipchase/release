@@ -60,13 +60,7 @@ git fetch
 git checkout "$COMMITISH"
 
 if [ "$(uname)" == "Darwin" ]; then
-  which -s brew
-  if [[ $? != 0 ]] ; then
-    # Install Homebrew
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-  fi
-  brew install coreutils
-  git tag "${DEPLOYMENT}-$(gdate --iso-8601=minutes)"
+  git tag -m "${DEPLOYMENT}-$(gdate --utc +%Y%m%d%H%M)"
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   git tag "${DEPLOYMENT}-$(date --iso-8601=minutes)"
 fi
