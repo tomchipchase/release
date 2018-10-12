@@ -62,7 +62,7 @@ git checkout "$COMMITISH"
 if [ "$(uname)" == "Darwin" ]; then
   git tag -m "${DEPLOYMENT}-$(gdate --utc +%Y%m%d%H%M)"
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-  git tag "${DEPLOYMENT}-$(date --iso-8601=minutes)"
+  git tag "${DEPLOYMENT}-$(date --utc +%Y%m%d%H%M)"
 fi
 
 git push --tags
